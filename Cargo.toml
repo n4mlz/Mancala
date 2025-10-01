@@ -1,2 +1,6 @@
 [workspace]
 members = ["crates/*"]
+
+[workspace.dependencies]
+rand = "0.9"
+mancala = { path = "crates/mancala" }
