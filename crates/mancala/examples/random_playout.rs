@@ -1,8 +1,7 @@
 use mancala::{Outcome, State};
 use rand::seq::IndexedRandom;
 
-#[test]
-fn random_playout_print_only() {
+fn main() {
     let mut rng = rand::rng();
 
     let mut s = State::new();
