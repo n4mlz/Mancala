@@ -20,7 +20,7 @@ impl RandomEvaluator {
 
 impl Default for RandomEvaluator {
     fn default() -> Self {
-        Self::new(256)
+        Self::new(1024)
     }
 }
 

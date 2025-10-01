@@ -95,12 +95,19 @@ fn simulate<E: Evaluator>(root: &mut Node, c_puct: f32, eval: &E) {
             evaluate_leaf(&*node, eval)
         };
 
-        // Backpropagation (flip sign per ply)
+        // Backpropagation (flip sign only when the turn switches)
         let mut v = value;
-        for &p in path.iter().rev() {
-            (*p).visits += 1;
-            (*p).value_sum += v;
-            v = -v;
+        for i in (0..path.len()).rev() {
+            let node_i = path[i];
+            (*node_i).visits += 1;
+            (*node_i).value_sum += v;
+
+            if i > 0 {
+                let parent = path[i - 1];
+                if (*parent).to_move != (*node_i).to_move {
+                    v = -v;
+                }
+            }
         }
     }
 }
@@ -109,8 +116,8 @@ fn simulate<E: Evaluator>(root: &mut Node, c_puct: f32, eval: &E) {
 fn evaluate_leaf<E: Evaluator>(n: &Node, eval: &E) -> f32 {
     if n.is_terminal() {
         match n.state.outcome() {
-            Outcome::Win(p) if p == n.to_move => 1.0,
-            Outcome::Win(_) => -1.0,
+            Outcome::Win(p) if p == n.to_move => -1.0,
+            Outcome::Win(_) => 1.0,
             Outcome::Draw => 0.0,
             Outcome::Ongoing => 0.0,
         }

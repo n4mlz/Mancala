@@ -60,10 +60,15 @@ impl Node {
 
     /// PUCT score: Q + c_puct * P * sqrt(N) / (1 + n)
     pub fn ucb(&self, child: &Node, c_puct: f32) -> f32 {
-        let q = child.value_mean();
+        let q_parent = if self.to_move == child.to_move {
+            child.value_mean()
+        } else {
+            -child.value_mean()
+        };
+
         let n = child.visits as f32;
         let n_parent = self.visits.max(1) as f32;
-        q + c_puct * child.prior * (n_parent.sqrt() / (1.0 + n))
+        q_parent + c_puct * child.prior * (n_parent.sqrt() / (1.0 + n))
     }
 
     pub fn best_child(&self, c_puct: f32) -> usize {
@@ -97,6 +102,7 @@ impl Node {
         let child_state = self.state.child_after_move(action).unwrap();
         let (child_priors, _v) = eval.policy_value(&child_state);
 
+        let to_move = child_state.current_player();
         let mut child = Node {
             state: child_state,
             prior,
@@ -104,7 +110,7 @@ impl Node {
             value_sum: 0.0,
             children: Vec::new(),
             unexpanded: child_priors,
-            to_move: self.state.current_player(),
+            to_move,
         };
         child.normalize_priors_if_needed();
 
